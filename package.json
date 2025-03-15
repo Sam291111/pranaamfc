@@ -1,0 +1,21 @@
+{
+  "name": "proclubs-website",
+  "version": "1.0.0",
+  "description": "FIFA Pro Clubs website",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "build": "cd server && npm install && npm run build",
+     "client-install": "cd client && npm install"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+   "dependencies": {
+    "eafc-clubs-api": "^1.2.0",
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1",
+     "cors": "^2.8.5"
+
+  }
+}

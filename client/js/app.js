@@ -48,7 +48,14 @@ async function fetchAndDisplayStats() {
 }
 
 async function fetchAndDisplayMembers() {
-  const membersContainer = document.querySelector('td[valign="top"]');
+    // Target the NEW div, not the entire td
+    const membersContainer = document.getElementById('members-container');
+
+    if (!membersContainer) {
+        console.error("Could not find 'members-container' element."); // Debugging!
+        return; // Exit if the container isn't found
+    }
+
     membersContainer.innerHTML = '<p>Loading players...</p>'; // Add loading indicator
 
     try {
@@ -71,7 +78,7 @@ async function fetchAndDisplayMembers() {
                         <p>Position: ${member.favoritePosition}</p>
                     </div>`;
             });
-            membersContainer.innerHTML = membersHTML;
+            membersContainer.innerHTML = membersHTML; // Insert into the SPECIFIC div
 
         } else {
              membersContainer.innerHTML = '<p>No members data found.</p>';
@@ -81,6 +88,7 @@ async function fetchAndDisplayMembers() {
         membersContainer.innerHTML = `<p>Error loading members: ${error.message}</p>`;
     }
 }
+
 async function fetchAndDisplayRecentResults() {
     const resultsContainer = document.getElementById('recent-results');
     if (!resultsContainer) {
@@ -124,8 +132,6 @@ async function fetchAndDisplayRecentResults() {
     }
 }
 
-
-
 async function searchClub() {
     const clubName = document.getElementById('clubSearch').value;
     const searchResultsDiv = document.getElementById('searchResults');
@@ -153,7 +159,6 @@ async function searchClub() {
         searchResultsDiv.innerHTML = `<p>Error searching: ${error.message}</p>`;
     }
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.location.pathname.includes('stats.html')) {

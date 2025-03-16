@@ -3,10 +3,19 @@
 <head>
     <title>The [Your Club Name Here] - Pro Clubs Legends!</title>
     <link rel="stylesheet" type="text/css" href="style.css">
+    <script src = "js/app.js" defer></script> <!-- Add the defer tag! -->
 </head>
 <body>
-
     <table width="800" border="0" align="center" cellpadding="10" cellspacing="0">
+       <!-- Add Search Bar -->
+    <tr>
+      <td colspan = "2" align = "center">
+           <label for="clubSearch">Search for a Club:</label>
+          <input type="text" id="clubSearch" name="clubSearch" placeholder="Enter club name">
+          <button onclick="searchClub()">Search</button>
+          <div id="searchResults"></div>
+      </td>
+    </tr>
         <tr>
             <td colspan="2" align="center">
                 <img src="images/spinning_logo.gif" alt="Spinning Logo">
@@ -41,17 +50,20 @@
             <td valign="top">
                 <h2>About the Club</h2>
                 <p>
-                    The [Your Club Name Here] is a legendary Pro Clubs team, known for our dazzling skills,
-                    unbreakable teamwork, and questionable fashion choices (both in-game and out).  We've been
-                    dominating the virtual pitch since [Year of Club Formation - Make one up!].
+                    The [Your Club Name Here] is a legendary Pro Clubs team...
                 </p>
-               <img src="images/player_images.jpg" alt="Players of the club">
+                <img src="images/player_images.jpg" alt="Players of the club">
                 <h2><a name="guestbook">Guestbook</a></h2>
-                <p>
+                 <p>
                     Leave a message for the team! (This is just a placeholder - real guestbooks need server-side code)
                 </p>
                 <textarea rows="4" cols="50"></textarea><br>
                 <button>Sign the Guestbook!</button>
+
+                <!-- Recent Results Section -->
+                <div id="recent-results">
+                    <!-- Recent results will be added here by JavaScript -->
+                </div>
             </td>
         </tr>
         <tr>
@@ -62,6 +74,5 @@
           </td>
         </tr>
     </table>
-
 </body>
 </html>

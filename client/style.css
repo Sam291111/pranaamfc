@@ -1,55 +1,100 @@
 body {
-    font-family: Arial, sans-serif;
-    background-image: url('images/background.jpg'); /* Tiled background */
+    font-family: Verdana, Arial, sans-serif; /* Web-safe fonts */
+    background-image: url('images/background.jpg'); /* Your tiled background */
     background-color: #f0f0f0; /* Fallback color */
     color: #000;
+    margin: 0; /* Remove default body margin */
+    padding: 0;
 }
 
 h1 {
-    color: #ff0000; /* Bright red */
+    color: #fff; /* White text */
     text-align: center;
+    background: linear-gradient(to bottom, #ff0000, #990000); /* Red gradient */
+    padding: 10px;
+    border-radius: 5px; /* Slightly rounded corners */
+    text-shadow: 2px 2px 4px #000; /* Subtle text shadow */
+    font-size: 2em;
 }
 
 h2 {
-    color: #0000ff; /* Bright blue */
+    color: #00008b; /* Darker Blue for contrast */
     border-bottom: 2px solid #000;
     padding-bottom: 5px;
+    margin-top: 20px; /* Add some space above h2 elements */
+     font-size: 1.5em;
 }
 
 .menu {
-    background-color: #ffffcc; /* Light yellow */
+    background: linear-gradient(to bottom, #ffffcc, #cccc99); /* Yellow gradient */
     padding: 10px;
     border: 2px solid #000;
+    border-radius: 5px;
+    box-shadow: 3px 3px 5px #888; /* Subtle drop shadow */
 }
 
 .menu ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
 .menu li {
-    margin-bottom: 5px;
+    margin-bottom: 8px; /* More spacing between list items */
 }
 
 .menu a {
-    color: #008000; /* Dark green */
+    color: #006400; /* Darker green */
     text-decoration: none;
+    display: block; /* Make the links block-level for easier clicking */
+    padding: 5px;
+    border-radius: 3px;
+     transition: background-color 0.3s ease;
 }
 
 .menu a:hover {
-    text-decoration: underline;
+    background-color: #004d00; /* Darker green on hover */
+     color: #fff;
 }
 
 .player-profile {
     margin-bottom: 20px;
-    padding: 10px;
+    padding: 15px; /* More padding */
     border: 1px solid #ccc;
-    background-color: #eee;
+    border-radius: 5px;
+    background-color: #f5f5f5; /* Lighter background */
+    box-shadow: 2px 2px 3px #bbb;
+}
+.player-profile h3{
+  font-size: 1.2em;
 }
 
 #stats-container {
-  /* Style for the stats container */
-  border: 1px solid #ccc;
-  padding: 10px;
-  background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 2px 2px 3px #bbb;
+}
+
+/* Table Styling */
+table {
+    width: 800px;
+    margin: 20px auto; /* Center the table and add some margin */
+    border-collapse: collapse; /* Remove extra spacing between cells */
+}
+
+td {
+    vertical-align: top;
+    padding: 10px;
+}
+/*Animations */
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.blink {
+    animation: blink 1s linear infinite; /* 1 second duration, linear timing, infinite loop */
 }

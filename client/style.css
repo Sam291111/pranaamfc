@@ -1,0 +1,55 @@
+body {
+    font-family: Arial, sans-serif;
+    background-image: url('images/background.jpg'); /* Tiled background */
+    background-color: #f0f0f0; /* Fallback color */
+    color: #000;
+}
+
+h1 {
+    color: #ff0000; /* Bright red */
+    text-align: center;
+}
+
+h2 {
+    color: #0000ff; /* Bright blue */
+    border-bottom: 2px solid #000;
+    padding-bottom: 5px;
+}
+
+.menu {
+    background-color: #ffffcc; /* Light yellow */
+    padding: 10px;
+    border: 2px solid #000;
+}
+
+.menu ul {
+    list-style: none;
+    padding: 0;
+}
+
+.menu li {
+    margin-bottom: 5px;
+}
+
+.menu a {
+    color: #008000; /* Dark green */
+    text-decoration: none;
+}
+
+.menu a:hover {
+    text-decoration: underline;
+}
+
+.player-profile {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #eee;
+}
+
+#stats-container {
+  /* Style for the stats container */
+  border: 1px solid #ccc;
+  padding: 10px;
+  background-color: #f9f9f9;
+}

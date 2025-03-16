@@ -89,11 +89,94 @@ async function fetchAndDisplayMembers() {
     }
 }
 
+// --- Guestbook Functions ---
 
+// Display existing guestbook entries
+async function displayGuestbookEntries() {
+    const entriesContainer = document.getElementById('guestbook-entries');
+     if (!entriesContainer) {
+        return; // Exit if the container isn't found
+    }
+    try {
+        const response = await fetch('/api/guestbook');
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const entries = await response.json();
+
+        if (entries.length > 0) {
+            const entriesHTML = entries.map(entry => `
+                <div class="guestbook-entry">
+                    <p><strong>${entry.name}</strong> (${entry.timestamp}):</p>
+                    <p>${entry.message}</p>
+                </div>
+            `).join('');
+            entriesContainer.innerHTML = entriesHTML;
+        } else {
+            entriesContainer.innerHTML = '<p>No entries yet.</p>';
+        }
+    } catch (error) {
+        console.error("Error fetching guestbook entries:", error);
+        entriesContainer.innerHTML = `<p>Error loading entries: ${error.message}</p>`;
+    }
+}
+
+// Handle guestbook form submission
+async function submitGuestbookEntry(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    const nameInput = document.getElementById('guestbook-name');
+    const messageInput = document.getElementById('guestbook-message');
+    const name = nameInput.value.trim();
+    const message = messageInput.value.trim();
+
+    if (!name || !message) {
+        alert("Please enter both your name and a message.");
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/guestbook', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, message })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json(); // Get error details
+            throw new Error(`Server error: ${response.status} - ${errorData.message || 'Unknown error'}`);
+        }
+
+        const newEntry = await response.json(); //we dont need to use this
+
+        // Add the new entry to the display (without reloading)
+        displayGuestbookEntries()
+
+        // Clear the form
+        nameInput.value = '';
+        messageInput.value = '';
+
+    } catch (error) {
+        console.error("Error submitting guestbook entry:", error);
+        alert(`Error submitting entry: ${error.message}`); // User-friendly error
+    }
+}
+
+// --- DOMContentLoaded Listener ---
 document.addEventListener('DOMContentLoaded', () => {
     if (window.location.pathname.includes('stats.html')) {
         fetchAndDisplayStats();
     } else if (window.location.pathname.includes('players.html')){
       fetchAndDisplayMembers();
+    } else {
+        // index.html - Load guestbook entries and set up form
+        displayGuestbookEntries();
+
+        const guestbookForm = document.getElementById('guestbook-form');
+        if (guestbookForm) {
+            guestbookForm.addEventListener('submit', submitGuestbookEntry);
+        }
     }
 });

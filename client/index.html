@@ -44,12 +44,26 @@
                     The [Your Club Name Here] is a legendary Pro Clubs team...
                 </p>
                 <img src="images/player_images.jpg" alt="Players of the club">
+
                 <h2><a name="guestbook">Guestbook</a></h2>
-                 <p>
-                    Leave a message for the team! (This is just a placeholder - real guestbooks need server-side code)
-                </p>
-                <textarea rows="4" cols="50"></textarea><br>
-                <button>Sign the Guestbook!</button>
+                <!-- Guestbook Form -->
+                <form id="guestbook-form">
+                    <div>
+                        <label for="guestbook-name">Name:</label>
+                        <input type="text" id="guestbook-name" name="name" required>
+                    </div>
+                    <div>
+                        <label for="guestbook-message">Message:</label>
+                        <textarea id="guestbook-message" name="message" rows="4" cols="50" required></textarea>
+                    </div>
+                    <button type="submit">Sign the Guestbook</button>
+                </form>
+
+                <!-- Guestbook Entries Display -->
+                <h3>Entries</h3>
+                <div id="guestbook-entries">
+                    <!-- Entries will be displayed here -->
+                </div>
             </td>
         </tr>
         <tr>

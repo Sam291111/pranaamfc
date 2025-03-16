@@ -3,12 +3,14 @@ const express = require('express');
 const { EAFCApiService } = require('eafc-clubs-api');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs'); // Import the 'fs' module (File System)
 
 const app = express();
 const port = process.env.PORT || 3001;
 const apiService = new EAFCApiService();
 
 app.use(cors());
+app.use(express.json()); // Add this line to parse JSON request bodies
 
 // Serve static files from the 'client' directory
 app.use(express.static(path.join(__dirname, '../client')));
@@ -44,7 +46,7 @@ app.get('/api/stats', async (req, res) => {
         console.log("Raw API Response (stats):", stats);
 
         // Send stats AND platform
-        res.json({ stats: stats, platform: platform });
+         res.json({ stats: stats, platform: platform });
 
 
     } catch (error) {
@@ -89,81 +91,47 @@ app.get('/api/members', async (req, res) => {
     }
 });
 
-// API endpoint for club search
-app.get('/api/search', async (req, res) => {
+// --- Guestbook API Endpoints ---
+
+// GET /api/guestbook:  Get all guestbook entries
+app.get('/api/guestbook', (req, res) => {
     try {
-        const clubName = req.query.clubName;
-        const platform = process.env.PLATFORM;
-
-        if (!clubName) {
-            return res.status(400).json({ error: 'clubName query parameter is required' });
-        }
-        if (!platform) {
-            throw new Error("PLATFORM must be set");
-        }
-
-        // Construct URL and log
-        const baseUrl = 'https://proclubs.ea.com/api/fc/';
-        const endpoint = 'allTimeLeaderboard/search'; // Corrected endpoint!
-        const url = new URL(endpoint, baseUrl);
-        url.searchParams.append('clubName', clubName);
-        url.searchParams.append('platform', platform);
-        console.log("Constructed URL (search):", url.toString());
-
-        console.log(`Searching for club: ${clubName}, platform: ${platform}`);
-        let searchResults;
-
-        try{
-          searchResults = await apiService.searchClub({ clubName, platform });
-        } catch (error) {
-          console.error("Error within the apiService:", error)
-          return res.status(500).json({error: "Failed to fetch data from the API", message: error.message})
-        }
-
-
-        // Log the raw response BEFORE parsing it as JSON:
-        console.log("Raw API Response (search):", searchResults);
-
-        res.json(searchResults);
-
+        const data = fs.readFileSync(path.join(__dirname, 'guestbook.json'), 'utf-8');
+        const entries = JSON.parse(data);
+        res.json(entries);
     } catch (error) {
-        console.error("Error in /api/search:", error);
-        res.status(500).json({ error: 'Failed to search for club', message: error.message });
+        console.error("Error reading guestbook:", error);
+        res.status(500).json({ error: 'Failed to read guestbook' });
     }
 });
 
-// API endpoint to get club info
-app.get('/api/clubinfo', async (req, res) => {
+// POST /api/guestbook: Add a new guestbook entry
+app.post('/api/guestbook', (req, res) => {
     try {
-        const clubId = process.env.CLUB_ID;
-        const platform = process.env.PLATFORM;
-        if(!clubId || !platform){
-          throw new Error("CLUB_ID and PLATFORM must be set")
-        }
-        // Construct the URL manually and log it
-        const baseUrl = 'https://proclubs.ea.com/api/fc/';
-        const endpoint = 'clubs/info';
-        const url = new URL(endpoint, baseUrl);
-        url.searchParams.append('clubIds', clubId); // Correct parameter name
-        url.searchParams.append('platform', platform);
-        console.log("Constructed URL (clubinfo):", url.toString());
-        console.log(`Fetching club info for clubId: ${clubId}, platform: ${platform}`);
+        const { name, message } = req.body;
 
-        let clubInfo;
-        try{
-          clubInfo = await apiService.clubInfo({clubIds: clubId, platform});
-        } catch(error){
-          console.error("Error within the apiService:", error)
-          return res.status(500).json({error: "Failed to fetch data from the API", message: error.message})
+        if (!name || !message) {
+            return res.status(400).json({ error: 'Name and message are required' });
         }
 
+        const data = fs.readFileSync(path.join(__dirname, 'guestbook.json'), 'utf-8');
+        const entries = JSON.parse(data);
 
-        // Log the raw response BEFORE parsing it as JSON:
-        console.log("Raw API Response (clubinfo):", clubInfo);
-        res.json(clubInfo);
+        const newEntry = {
+            id: entries.length > 0 ? entries[entries.length - 1].id + 1 : 1, // Simple incrementing ID
+            name: name,
+            message: message,
+            timestamp: new Date().toISOString() // ISO 8601 format
+        };
+
+        entries.push(newEntry);
+        fs.writeFileSync(path.join(__dirname, 'guestbook.json'), JSON.stringify(entries, null, 2), 'utf-8'); // Write back to file
+
+        res.status(201).json(newEntry); // Return the new entry (good practice)
+
     } catch (error) {
-        console.error("Error in /api/clubinfo:", error);
-        res.status(500).json({ error: 'Failed to get club info', message: error.message });
+        console.error("Error adding to guestbook:", error);
+        res.status(500).json({ error: 'Failed to add entry to guestbook' });
     }
 });
 

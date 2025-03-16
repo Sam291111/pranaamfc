@@ -67,11 +67,21 @@ async function fetchAndDisplayMembers() {
 
         if (data && data.members && data.members.length > 0) {
             let membersHTML = '<h2>Our Legendary Squad</h2>'; // Initialize HTML
-
+            // Name mapping object:
+            const nameMap = {
+                'hillsygh': 'Gowri Revadala',
+                'billyjp2006_': 'Baba Baba',
+                'KA_Luke': 'Sandooge Adebayo',
+                'Musthakim': 'Isabel Spiro',
+                'Slooo47': 'James Parker',
+                // Add other mappings here as needed
+            };
             data.members.forEach(member => {
+                // Use the name mapping.  If a name isn't found, use the original name.
+                const displayName = nameMap[member.name] || member.name;
                 membersHTML += `
                     <div class="player-profile">
-                        <h3>${member.name} <span class = "blink">♦️</span></h3>
+                        <h3>${displayName} <span class = "blink">♦️</span></h3>
                         <p>Games Played: ${member.gamesPlayed}</p>
                         <p>Goals: ${member.goals}</p>
                         <p>Assists: ${member.assists}</p>

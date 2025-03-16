@@ -12,6 +12,32 @@ const apiService = new EAFCApiService();
 app.use(cors());
 app.use(express.json()); // Add this line to parse JSON request bodies
 
+// --- Visitor Counter Middleware ---
+const counterFilePath = path.join(__dirname, 'counter.txt');
+let visitorCount = 0;
+
+// Read initial count (synchronously, on startup)
+try {
+    const data = fs.readFileSync(counterFilePath, 'utf-8');
+    visitorCount = parseInt(data, 10) || 0;
+} catch (error) {
+    console.error("Error reading counter file:", error);
+    // If there's an error (file doesn't exist, etc.), we'll start at 0.
+}
+
+// Middleware to increment the counter on EVERY request.
+app.use((req, res, next) => {
+  // We increment for ALL requests, not just '/'.
+  try {
+    visitorCount++;
+    fs.writeFileSync(counterFilePath, visitorCount.toString(), 'utf-8');
+    //console.log("Visitor Count:", visitorCount); // Debugging
+  } catch (error) {
+    console.error("Error writing to counter file:", error);
+  }
+  next(); // VERY IMPORTANT: Call next() to continue to other middleware/routes
+});
+
 // Serve static files from the 'client' directory
 app.use(express.static(path.join(__dirname, '../client')));
 
@@ -140,19 +166,6 @@ app.post('/api/guestbook', (req, res) => {
     }
 });
 
-// --- Visitor Counter ---
-const counterFilePath = path.join(__dirname, 'counter.txt');
-let visitorCount = 0; // Initialize a variable to hold the count
-
-// Read the initial count from the file (synchronously, on server startup)
-try {
-    const data = fs.readFileSync(counterFilePath, 'utf-8');
-    visitorCount = parseInt(data, 10) || 0; // Parse, default to 0 if NaN
-} catch (error) {
-    console.error("Error reading counter file:", error);
-    // If there's an error (file doesn't exist, etc.), we'll start at 0.
-}
-
 // New API route, to send count to the client
 app.get('/api/count', (req, res) =>{
     try{
@@ -164,17 +177,8 @@ app.get('/api/count', (req, res) =>{
     }
 })
 
-// Increment the counter on every request to /
+// Explicitly serve index.html for the root route AFTER the middleware.
 app.get('/', (req, res) => {
-  try {
-        visitorCount++;
-        fs.writeFileSync(counterFilePath, visitorCount.toString(), 'utf-8');
-    } catch (error) {
-        console.error("Error writing to counter file:", error);
-        //  Log the error, but don't crash the server.
-        // In a production app, you might want more sophisticated error handling.
-    }
-    //console.log("Request to / - Visitor Count:", visitorCount); // Debugging
     res.sendFile(path.join(__dirname, '../client/index.html'));
 });
 

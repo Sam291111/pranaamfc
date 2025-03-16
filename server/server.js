@@ -15,40 +15,80 @@ app.use(express.json()); // Add this line to parse JSON request bodies
 // Serve static files from the 'client' directory
 app.use(express.static(path.join(__dirname, '../client')));
 
-// --- (Existing API routes: /api/stats, /api/members - no changes needed) ---
+// API endpoint to get overall club stats
 app.get('/api/stats', async (req, res) => {
-  try {
-      const clubId = process.env.CLUB_ID;
-      const platform = process.env.PLATFORM;
-      if (!clubId || !platform) {
-          throw new Error("CLUB_ID and PLATFORM must be set in .env");
-      }
-      const stats = await apiService.overallStats({ clubIds: clubId, platform });
+    try {
+        const clubId = process.env.CLUB_ID;
+        const platform = process.env.PLATFORM;
+        if (!clubId || !platform) {
+            throw new Error("CLUB_ID and PLATFORM must be set in .env");
+        }
 
-      // Add platform to the response
-       res.json({ stats: stats, platform: platform }); // Send stats AND platform
+        // Construct the URL manually (for debugging) and log it
+        const baseUrl = 'https://proclubs.ea.com/api/fc/';
+        const endpoint = 'clubs/overallStats';
+        const url = new URL(endpoint, baseUrl);
+        url.searchParams.append('clubIds', clubId);
+        url.searchParams.append('platform', platform);
+
+        console.log("Constructed URL:", url.toString()); // Log the FULL URL
+
+        // Use the apiService to fetch data.
+        let stats;
+        try {
+            stats = await apiService.overallStats({ clubIds: clubId, platform });
+        } catch (error) {
+            console.error("Error within the apiService:", error);
+            return res.status(500).json({ error: "Failed to fetch data from the API", message: error.message });
+        }
+
+        // Log the raw API response (important for debugging)
+        console.log("Raw API Response (stats):", stats);
+
+        // Send stats AND platform
+         res.json({ stats: stats, platform: platform });
 
 
-  } catch (error) {
-      console.error("Error fetching stats:", error);
-      res.status(500).json({ error: 'Failed to fetch stats', message: error.message });
-  }
+    } catch (error) {
+        console.error("Error in /api/stats:", error);
+        res.status(500).json({ error: 'Failed to fetch stats', message: error.message });
+    }
 });
 
 // API endpoint to get member stats
 app.get('/api/members', async (req, res) => {
-  try {
-      const clubId = process.env.CLUB_ID;
-      const platform = process.env.PLATFORM;
-      if (!clubId || !platform) {
-          throw new Error("CLUB_ID and PLATFORM must be set");
-      }
-      const memberStats = await apiService.memberStats({ clubId, platform });
-      res.json(memberStats);
-  } catch (error) {
-      console.error("Error fetching member stats:", error);
-      res.status(500).json({ error: 'Failed to fetch member stats', message: error.message});
-  }
+    try {
+        const clubId = process.env.CLUB_ID;
+        const platform = process.env.PLATFORM;
+        if (!clubId || !platform) {
+            throw new Error("CLUB_ID and PLATFORM must be set");
+        }
+         // Construct URL and log (for debugging - you can add this to other routes too)
+        const baseUrl = 'https://proclubs.ea.com/api/fc/';
+        const endpoint = 'members/stats';
+        const url = new URL(endpoint, baseUrl);
+        url.searchParams.append('clubId', clubId);
+        url.searchParams.append('platform', platform);
+        console.log("Constructed URL (members):", url.toString());
+        console.log(`Fetching members for clubId: ${clubId}, platform: ${platform}`);
+
+        let memberStats;
+        try {
+          memberStats = await apiService.memberStats({ clubId, platform });
+        }
+        catch(error){
+          console.error("Error within the apiService:", error)
+          return res.status(500).json({error: "Failed to fetch data from the API", message: error.message})
+        }
+
+        // Log the raw response BEFORE parsing it as JSON:
+        console.log("Raw API Response (members):", memberStats);
+
+        res.json(memberStats);
+    } catch (error) {
+        console.error("Error in /api/members:", error);
+        res.status(500).json({ error: 'Failed to fetch member stats', message: error.message});
+    }
 });
 
 // --- Guestbook API Endpoints ---
@@ -100,6 +140,43 @@ app.post('/api/guestbook', (req, res) => {
     }
 });
 
+// --- Visitor Counter ---
+const counterFilePath = path.join(__dirname, 'counter.txt');
+let visitorCount = 0; // Initialize a variable to hold the count
+
+// Read the initial count from the file (synchronously, on server startup)
+try {
+    const data = fs.readFileSync(counterFilePath, 'utf-8');
+    visitorCount = parseInt(data, 10) || 0; // Parse, default to 0 if NaN
+} catch (error) {
+    console.error("Error reading counter file:", error);
+    // If there's an error (file doesn't exist, etc.), we'll start at 0.
+}
+
+// New API route, to send count to the client
+app.get('/api/count', (req, res) =>{
+    try{
+        res.json(visitorCount)
+    }
+     catch (error) {
+        console.error("Error getting count:", error);
+        res.status(500).json({ error: 'Failed to get count', message: error.message });
+    }
+})
+
+// Increment the counter on every request to /
+app.get('/', (req, res) => {
+  try {
+        visitorCount++;
+        fs.writeFileSync(counterFilePath, visitorCount.toString(), 'utf-8');
+    } catch (error) {
+        console.error("Error writing to counter file:", error);
+        //  Log the error, but don't crash the server.
+        // In a production app, you might want more sophisticated error handling.
+    }
+    //console.log("Request to / - Visitor Count:", visitorCount); // Debugging
+    res.sendFile(path.join(__dirname, '../client/index.html'));
+});
 
 // Serve index.html for all other routes (for client-side routing)
 app.get('*', (req, res) => {

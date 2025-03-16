@@ -163,6 +163,23 @@ async function submitGuestbookEntry(event) {
         alert(`Error submitting entry: ${error.message}`); // User-friendly error
     }
 }
+// New function to fetch and display visitor count
+async function fetchAndDisplayVisitorCount() {
+    const countContainer = document.getElementById('visitor-count');
+    if (!countContainer) return; // Exit if container doesn't exist
+
+    try {
+        const response = await fetch('/api/count');
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const count = await response.json();
+        countContainer.textContent = count; // Update the count display
+    } catch (error) {
+        console.error("Error fetching visitor count:", error);
+        countContainer.textContent = 'Error'; // Display error message
+    }
+}
 
 // --- DOMContentLoaded Listener ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -173,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         // index.html - Load guestbook entries and set up form
         displayGuestbookEntries();
+        fetchAndDisplayVisitorCount()
 
         const guestbookForm = document.getElementById('guestbook-form');
         if (guestbookForm) {

@@ -1,6 +1,7 @@
 async function fetchAndDisplayStats() {
     const statsContainer = document.getElementById('stats-container');
-    statsContainer.innerHTML = "<p>Loading stats...</p>"; // Loading indicator
+    if (!statsContainer) return; // Exit if the element doesn't exist
+    statsContainer.innerHTML = "<p>Loading stats...</p>";
 
     try {
         const response = await fetch('/api/stats');
@@ -11,7 +12,7 @@ async function fetchAndDisplayStats() {
 
         if (Array.isArray(data.stats) && data.stats.length > 0) {
             const stats = data.stats[0];
-            const gamesPlayed = parseInt(stats.gamesPlayed, 10); // Ensure numeric
+            const gamesPlayed = parseInt(stats.gamesPlayed, 10);
             const wins = parseInt(stats.wins, 10);
             const losses = parseInt(stats.losses, 10);
             const ties = parseInt(stats.ties, 10);
@@ -36,7 +37,6 @@ async function fetchAndDisplayStats() {
                 <p>Best Division: ${stats.bestDivision}</p>
                 <p>Skill Rating: ${stats.skillRating}</p>
                 <p>Unbeaten Streak: ${stats.unbeatenstreak}</p>
-
             `;
         } else {
             statsContainer.innerHTML = `<p>No stats found.</p>`;
@@ -47,38 +47,87 @@ async function fetchAndDisplayStats() {
     }
 }
 
-async function fetchAndDisplayMembers() {
-    // Target the NEW div, not the entire td
-    const membersContainer = document.getElementById('members-container');
+// Name mapping object (keep this updated):
+const nameMap = {
+    'hillsygh': 'Gowri Revadala',
+    'billyjp2006_': 'Baba Baba',
+    'KA_Luke': 'Sandooge Adebayo',
+    'Musthakim': 'Isabel Spiro',
+    'Slooo47': 'James Parker',
+    // Add other mappings here as needed
+};
 
-    if (!membersContainer) {
-        console.error("Could not find 'members-container' element."); // Debugging!
-        return; // Exit if the container isn't found
+// NEW function to apply daily change indicators
+async function fetchAndApplyDailyChanges() {
+    try {
+        const response = await fetch('/api/daily_changes');
+        if (!response.ok) {
+            throw new Error(`HTTP error fetching daily changes! Status: ${response.status}`);
+        }
+        const changes = await response.json();
+
+        // Find all player profile divs
+        const playerProfiles = document.querySelectorAll('.player-profile');
+
+        playerProfiles.forEach(profile => {
+            const nameElement = profile.querySelector('h3');
+            if (!nameElement) return;
+
+            // Extract the displayed name (before the span might be added)
+            const displayedName = nameElement.childNodes[0].nodeValue.trim();
+
+            // Find the API name (gamertag) corresponding to the displayed name
+            const apiName = Object.keys(nameMap).find(key => nameMap[key] === displayedName) || displayedName;
+
+            const playerChanges = changes[apiName]; // Look up changes using the API name
+
+            // Remove old indicators first to prevent duplicates
+            let existingIndicators = nameElement.querySelectorAll('.change-indicator');
+            existingIndicators.forEach(ind => ind.remove());
+
+            // Add new indicators if there are changes
+            if (playerChanges) {
+                let indicatorHTML = '';
+                if (playerChanges.newGoals > 0) {
+                    indicatorHTML += ` <span class="change-indicator goal-change">+${playerChanges.newGoals}G</span>`;
+                }
+                if (playerChanges.newAssists > 0) {
+                    indicatorHTML += ` <span class="change-indicator assist-change">+${playerChanges.newAssists}A</span>`;
+                }
+                if (indicatorHTML) {
+                    nameElement.insertAdjacentHTML('beforeend', indicatorHTML);
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error("Error fetching or applying daily changes:", error);
+        // Optionally display an error message to the user, but don't break the page
     }
+}
 
-    membersContainer.innerHTML = '<p>Loading players...</p>'; // Add loading indicator
+
+async function fetchAndDisplayMembers() {
+    const membersContainer = document.getElementById('members-container');
+    if (!membersContainer) {
+        console.error("Could not find 'members-container' element.");
+        return;
+    }
+    membersContainer.innerHTML = '<p>Loading players...</p>';
 
     try {
         const response = await fetch('/api/members');
-        if(!response.ok){
-            throw new Error('Failed to fecth members data')
+        if (!response.ok) {
+            throw new Error('Failed to fetch members data');
         }
         const data = await response.json();
 
         if (data && data.members && data.members.length > 0) {
-            let membersHTML = '<h2>Our Legendary Squad</h2>'; // Initialize HTML
-            // Name mapping object:
-            const nameMap = {
-                'hillsygh': 'Gowri Revadala',
-                'billyjp2006_': 'Baba Baba',
-                'KA_Luke': 'Sandooge Adebayo',
-                'Musthakim': 'Isabel Spiro',
-                'Slooo47': 'James Parker',
-                // Add other mappings here as needed
-            };
+            let membersHTML = '<h2>Our Legendary Squad</h2>';
+
             data.members.forEach(member => {
-                // Use the name mapping.  If a name isn't found, use the original name.
-                const displayName = nameMap[member.name] || member.name;
+                const displayName = nameMap[member.name] || member.name; // Use name mapping
+
                 membersHTML += `
                     <div class="player-profile">
                         <h3>${displayName} <span class = "blink">♦️</span></h3>
@@ -88,10 +137,13 @@ async function fetchAndDisplayMembers() {
                         <p>Position: ${member.favoritePosition}</p>
                     </div>`;
             });
-            membersContainer.innerHTML = membersHTML; // Insert into the SPECIFIC div
+            membersContainer.innerHTML = membersHTML;
+
+            // *** AFTER displaying members, fetch and apply the daily changes ***
+            fetchAndApplyDailyChanges();
 
         } else {
-             membersContainer.innerHTML = '<p>No members data found.</p>';
+            membersContainer.innerHTML = '<p>No members data found.</p>';
         }
     } catch (error) {
         console.error('Error fetching data:', error);
@@ -100,8 +152,6 @@ async function fetchAndDisplayMembers() {
 }
 
 // --- Guestbook Functions ---
-
-// Display existing guestbook entries
 async function displayGuestbookEntries() {
     const entriesContainer = document.getElementById('guestbook-entries');
      if (!entriesContainer) {
@@ -115,12 +165,13 @@ async function displayGuestbookEntries() {
         const entries = await response.json();
 
         if (entries.length > 0) {
+            // Format the timestamp and map the entries
             const entriesHTML = entries.map(entry => `
                 <div class="guestbook-entry">
-                    <p><strong>${entry.name}</strong> (${entry.timestamp}):</p>
+                    <p><strong>${entry.name}</strong> (${new Date(entry.timestamp).toLocaleString()}):</p>
                     <p>${entry.message}</p>
                 </div>
-            `).join('');
+            `).join(''); // Join the array of HTML strings
             entriesContainer.innerHTML = entriesHTML;
         } else {
             entriesContainer.innerHTML = '<p>No entries yet.</p>';
@@ -131,7 +182,6 @@ async function displayGuestbookEntries() {
     }
 }
 
-// Handle guestbook form submission
 async function submitGuestbookEntry(event) {
     event.preventDefault(); // Prevent the default form submission
 
@@ -159,10 +209,10 @@ async function submitGuestbookEntry(event) {
             throw new Error(`Server error: ${response.status} - ${errorData.message || 'Unknown error'}`);
         }
 
-        const newEntry = await response.json(); //we dont need to use this
+        const newEntry = await response.json(); // We don't need to use the response here
 
-        // Add the new entry to the display (without reloading)
-        displayGuestbookEntries()
+        // Refresh the entire guestbook display
+        displayGuestbookEntries();
 
         // Clear the form
         nameInput.value = '';
@@ -173,7 +223,8 @@ async function submitGuestbookEntry(event) {
         alert(`Error submitting entry: ${error.message}`); // User-friendly error
     }
 }
-// New function to fetch and display visitor count
+
+// --- Visitor Count Function ---
 async function fetchAndDisplayVisitorCount() {
     const countContainer = document.getElementById('visitor-count');
     if (!countContainer) return; // Exit if container doesn't exist
@@ -195,12 +246,12 @@ async function fetchAndDisplayVisitorCount() {
 document.addEventListener('DOMContentLoaded', () => {
     if (window.location.pathname.includes('stats.html')) {
         fetchAndDisplayStats();
-    } else if (window.location.pathname.includes('players.html')){
-      fetchAndDisplayMembers();
+    } else if (window.location.pathname.includes('players.html')) {
+        fetchAndDisplayMembers(); // This will now also trigger the daily changes check
     } else {
-        // index.html - Load guestbook entries and set up form
+        // index.html - Load guestbook entries, visitor count, and set up form
         displayGuestbookEntries();
-        fetchAndDisplayVisitorCount()
+        fetchAndDisplayVisitorCount();
 
         const guestbookForm = document.getElementById('guestbook-form');
         if (guestbookForm) {

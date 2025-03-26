@@ -1,7 +1,9 @@
 body {
     font-family: Verdana, Arial, sans-serif; /* Web-safe fonts */
-    background-image: url('images/background.jpg'); /* Your tiled background */
+    background-image: url('/images/background.jpg'); /* Absolute path for background */
     background-color: #f0f0f0; /* Fallback color */
+    background-repeat: repeat; /* Ensure background tiles */
+    background-attachment: fixed; /* Optional: keeps background static on scroll */
     color: #000;
     margin: 0; /* Remove default body margin */
     padding: 0;
@@ -15,6 +17,7 @@ h1 {
     border-radius: 5px; /* Slightly rounded corners */
     text-shadow: 2px 2px 4px #000; /* Subtle text shadow */
     font-size: 2em;
+    margin-top: 0; /* Remove default margin for h1 */
 }
 
 h2 {
@@ -25,12 +28,20 @@ h2 {
      font-size: 1.5em;
 }
 
+h3 {
+    color: #333; /* Dark grey for subheadings */
+    font-size: 1.2em;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
 .menu {
     background: linear-gradient(to bottom, #ffffcc, #cccc99); /* Yellow gradient */
     padding: 10px;
     border: 2px solid #000;
     border-radius: 5px;
     box-shadow: 3px 3px 5px #888; /* Subtle drop shadow */
+    margin-bottom: 20px; /* Add space below menu */
 }
 
 .menu ul {
@@ -49,14 +60,15 @@ h2 {
     display: block; /* Make the links block-level for easier clicking */
     padding: 5px;
     border-radius: 3px;
-     transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease;
 }
 
 .menu a:hover {
     background-color: #004d00; /* Darker green on hover */
-     color: #fff;
+    color: #fff;
 }
 
+/* Player Profile Styling */
 .player-profile {
     margin-bottom: 20px;
     padding: 15px; /* More padding */
@@ -65,36 +77,151 @@ h2 {
     background-color: #f5f5f5; /* Lighter background */
     box-shadow: 2px 2px 3px #bbb;
 }
-.player-profile h3{
-  font-size: 1.2em;
+.player-profile h3 {
+  font-size: 1.3em; /* Slightly larger player names */
+  margin-bottom: 8px;
+  color: #00008b; /* Match h2 color */
+}
+.player-profile p {
+    margin: 5px 0; /* Add spacing between stat lines */
 }
 
+/* Daily Change Indicator Styling */
+.change-indicator {
+    font-size: 0.8em; /* Make it smaller */
+    padding: 2px 4px;
+    border-radius: 3px;
+    margin-left: 5px;
+    color: white;
+    font-weight: bold;
+    vertical-align: middle; /* Align better with the text */
+}
+
+.goal-change {
+    background-color: green; /* Green for goals */
+}
+
+.assist-change {
+    background-color: blue; /* Blue for assists */
+}
+
+
+/* Stats Container Styling */
 #stats-container {
     border: 1px solid #ccc;
     padding: 15px;
-    background-color: #fff;
+    background-color: #fff; /* White background for readability */
     border-radius: 5px;
     box-shadow: 2px 2px 3px #bbb;
+    margin-top: 20px; /* Add space above stats container */
+}
+#stats-container h3 {
+    margin-top: 0; /* Remove extra top margin inside container */
+    color: #00008b;
+}
+#stats-container p {
+    margin: 8px 0; /* Adjust spacing for stats */
 }
 
-/* Table Styling */
+/* Table Layout Styling */
 table {
-    width: 800px;
+    width: 800px; /* Adjust as needed */
     margin: 20px auto; /* Center the table and add some margin */
     border-collapse: collapse; /* Remove extra spacing between cells */
+    background-color: rgba(255, 255, 255, 0.8); /* Slightly transparent white background for the table */
+    border: 2px solid black; /* Add a border around the main table */
+    border-radius: 5px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3); /* More pronounced shadow */
 }
 
 td {
     vertical-align: top;
-    padding: 10px;
+    padding: 15px; /* Consistent padding */
 }
-/*Animations */
+
+/* Main Content Area Styling */
+td[valign="top"]:not([width="200"]) { /* Target the main content column */
+    background-color: #fff; /* Ensure white background for content */
+    border-left: 1px solid #ccc; /* Separator line */
+}
+
+
+/* Guestbook Styling */
+#guestbook-form div {
+    margin-bottom: 10px;
+}
+
+#guestbook-form label {
+    display: block; /* Make labels appear on their own line */
+    margin-bottom: 3px;
+    font-weight: bold;
+}
+
+#guestbook-form input[type="text"],
+#guestbook-form textarea {
+    width: 95%; /* Make inputs take up most of the width */
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+#guestbook-form button[type="submit"] {
+    padding: 8px 15px;
+    background: linear-gradient(to bottom, #4CAF50, #367c39); /* Green gradient button */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px #000;
+    box-shadow: 2px 2px 3px #888;
+    transition: background 0.3s ease;
+}
+
+#guestbook-form button[type="submit"]:hover {
+    background: linear-gradient(to bottom, #367c39, #2d6a30);
+}
+
+#guestbook-entries {
+    margin-top: 20px;
+    border-top: 1px dashed #ccc; /* Separator */
+    padding-top: 15px;
+}
+
+.guestbook-entry {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+.guestbook-entry p {
+    margin: 5px 0;
+}
+
+.guestbook-entry strong {
+    color: #006400; /* Dark green name */
+}
+
+
+/* Blinking Animation (for player name diamond) */
 @keyframes blink {
     0% { opacity: 1; }
-    50% { opacity: 0; }
+    50% { opacity: 0.2; } /* Make it dimmer, not fully invisible */
     100% { opacity: 1; }
 }
 
 .blink {
-    animation: blink 1s linear infinite; /* 1 second duration, linear timing, infinite loop */
+    animation: blink 1.5s linear infinite; /* Slower blink */
+    color: red; /* Make the diamond red */
+    display: inline-block; /* Needed for vertical-align */
+    vertical-align: middle;
+}
+
+
+/* Visitor Counter Styling */
+#visitor-count {
+    font-weight: bold;
+    color: #cc0000; /* Make counter stand out */
 }
